@@ -3,6 +3,7 @@
 
 import tensorflow as tf
 import os
+import sys
 import time
 import datetime
 import data_helpers
@@ -33,7 +34,7 @@ data_loader = MultiClassDataLoader(tf.flags, WordDataProcessor())
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
-FLAGS._parse_flags()
+FLAGS(sys.argv)
 print("\nParameters:")
 for attr, value in sorted(FLAGS.__flags.items()):
     print("{}={}".format(attr.upper(), value))
@@ -56,7 +57,7 @@ print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 # ==================================================
 
 with tf.Graph().as_default():
-    session_conf = tf.ConfigProto(
+    session_conf = tf.compat.v1.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement)
     sess = tf.Session(config=session_conf)
@@ -72,7 +73,7 @@ with tf.Graph().as_default():
 
         # Define Training procedure
         global_step = tf.Variable(0, name="global_step", trainable=False)
-        optimizer = tf.train.AdamOptimizer(1e-3)
+        optimizer = tf.compat.v1.train.AdamOptimizer(1e-3)
         grads_and_vars = optimizer.compute_gradients(cnn.loss)
         train_op = optimizer.apply_gradients(grads_and_vars, global_step=global_step)
 
@@ -80,11 +81,11 @@ with tf.Graph().as_default():
         grad_summaries = []
         for g, v in grads_and_vars:
             if g is not None:
-                grad_hist_summary = tf.histogram_summary("{}/grad/hist".format(v.name), g)
-                sparsity_summary = tf.scalar_summary("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
+                grad_hist_summary = tf.summary.histogram("{}/grad/hist".format(v.name), g)
+                sparsity_summary = tf.summary.scalar("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
                 grad_summaries.append(grad_hist_summary)
                 grad_summaries.append(sparsity_summary)
-        grad_summaries_merged = tf.merge_summary(grad_summaries)
+        grad_summaries_merged = tf.summary.merge(grad_summaries)
 
         # Output directory for models and summaries
         timestamp = str(int(time.time()))
@@ -96,14 +97,14 @@ with tf.Graph().as_default():
         acc_summary = tf.scalar_summary("accuracy", cnn.accuracy)
 
         # Train Summaries
-        train_summary_op = tf.merge_summary([loss_summary, acc_summary, grad_summaries_merged])
+        train_summary_op = tf.summary.merge([loss_summary, acc_summary, grad_summaries_merged])
         train_summary_dir = os.path.join(out_dir, "summaries", "train")
-        train_summary_writer = tf.train.SummaryWriter(train_summary_dir, sess.graph)
+        train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
 
         # Dev summaries
-        dev_summary_op = tf.merge_summary([loss_summary, acc_summary])
+        dev_summary_op = tf.summary.merge([loss_summary, acc_summary])
         dev_summary_dir = os.path.join(out_dir, "summaries", "dev")
-        dev_summary_writer = tf.train.SummaryWriter(dev_summary_dir, sess.graph)
+        dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)
 
         # Checkpoint directory. Tensorflow assumes this directory already exists so we need to create it
         checkpoint_dir = os.path.abspath(os.path.join(out_dir, "checkpoints"))
