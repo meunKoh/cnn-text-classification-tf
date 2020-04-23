@@ -5,6 +5,7 @@ import json
 import tensorflow as tf
 import numpy as np
 import os
+import sys
 import data_helpers
 from multi_class_data_loader import MultiClassDataLoader
 from word_data_processor import WordDataProcessor
@@ -26,7 +27,7 @@ data_loader = MultiClassDataLoader(tf.flags, WordDataProcessor())
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
-FLAGS._parse_flags()
+FLAGS(sys.argv)
 print("\nParameters:")
 for attr, value in sorted(FLAGS.__flags.items()):
     print("{}={}".format(attr.upper(), value))
@@ -57,7 +58,7 @@ print("\nEvaluating...\n")
 checkpoint_file = tf.train.latest_checkpoint(FLAGS.checkpoint_dir)
 graph = tf.Graph()
 with graph.as_default():
-    session_conf = tf.ConfigProto(
+    session_conf = tf.compat.v1.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement)
     sess = tf.Session(config=session_conf)
@@ -97,3 +98,4 @@ out_path = os.path.join(FLAGS.checkpoint_dir, "../../../", "prediction.csv")
 print("Saving evaluation to {0}".format(out_path))
 with open(out_path, 'w') as f:
     csv.writer(f).writerows(predictions_human_readable)
+    
