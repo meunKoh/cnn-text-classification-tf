@@ -93,8 +93,8 @@ with tf.Graph().as_default():
         print("Writing to {}\n".format(out_dir))
 
         # Summaries for loss and accuracy
-        loss_summary = tf.scalar_summary("loss", cnn.loss)
-        acc_summary = tf.scalar_summary("accuracy", cnn.accuracy)
+        loss_summary = tf.summary.scalar("loss", cnn.loss)
+        acc_summary = tf.summary.scalar("accuracy", cnn.accuracy)
 
         # Train Summaries
         train_summary_op = tf.summary.merge([loss_summary, acc_summary, grad_summaries_merged])
