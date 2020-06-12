@@ -22,17 +22,17 @@ class MultiClassDataLoader(object):
 
 
     def define_flags(self):
-        self.__flags.DEFINE_string("train_data_file", "./data/bh_label.train", "Data source for the training data.")
-        self.__flags.DEFINE_string("dev_data_file", "./data/bh_label.test", "Data source for the cross validation data.")
-        self.__flags.DEFINE_string("class_data_file", "./data/bh.cls", "Data source for the class list.")
+        self.__flags.DEFINE_string("train_data_file", "./data/bh_small.train", "Data source for the training data.")
+        self.__flags.DEFINE_string("dev_data_file", "./data/bh_small.test", "Data source for the cross validation data.")
+        self.__flags.DEFINE_string("class_data_file", "./data/bh_small.cls", "Data source for the class list.")
 
     def prepare_data(self):
         self.__resolve_params()
         x_train, y_train = self.__load_data_and_labels(self.__train_data_file)
         x_dev, y_dev = self.__load_data_and_labels(self.__dev_data_file)
 
-        max_doc_len = max([len(doc.decode("utf-8")) for doc in x_train])
-        max_doc_len_dev = max([len(doc.decode("utf-8")) for doc in x_dev])
+        max_doc_len = max([len(doc) for doc in x_train])
+        max_doc_len_dev = max([len(doc) for doc in x_dev])
         if max_doc_len_dev > max_doc_len:
             max_doc_len = max_doc_len_dev
        
