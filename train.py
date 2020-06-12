@@ -9,6 +9,7 @@ import data_helpers
 from text_cnn import TextCNN
 from multi_class_data_loader import MultiClassDataLoader
 from word_data_processor import WordDataProcessor
+from tensorflow.keras.preprocessing.text import Tokenizer
 
 # Parameters
 # ==================================================
@@ -29,7 +30,7 @@ tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many ste
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
-data_loader = MultiClassDataLoader(tf.flags, WordDataProcessor())
+data_loader = MultiClassDataLoader(tf.flags, Tokenizer())
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
@@ -48,7 +49,7 @@ print("Loading data...")
 x_train, y_train, x_dev, y_dev = data_loader.prepare_data()
 vocab_processor = data_loader.vocab_processor
 
-print("Vocabulary Size: {:d}".format(len(vocab_processor.vocabulary_)))
+print("Vocabulary Size: {:d}".format(len(vocab_processor.word_index)))
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
 
@@ -59,16 +60,16 @@ with tf.Graph().as_default():
     session_conf = tf.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement)
-    sess = tf.Session(config=session_conf)
+    sess = tf.compat.v1.Session(config=session_conf)
     with sess.as_default():
         cnn = TextCNN(
             sequence_length=x_train.shape[1],
             num_classes=y_train.shape[1],
-            vocab_size=len(vocab_processor.vocabulary_),
-            embedding_size=FLAGS.embedding_dim,
-            filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
-            num_filters=FLAGS.num_filters,
-            l2_reg_lambda=FLAGS.l2_reg_lambda)
+            vocab_size=len(vocab_processor.word_index)+1,
+                embedding_size=FLAGS.embedding_dim,
+                filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
+                num_filters=FLAGS.num_filters,
+                l2_reg_lambda=FLAGS.l2_reg_lambda)
 
         # Define Training procedure
         global_step = tf.Variable(0, name="global_step", trainable=False)
@@ -80,11 +81,19 @@ with tf.Graph().as_default():
         grad_summaries = []
         for g, v in grads_and_vars:
             if g is not None:
+<<<<<<< Updated upstream
                 grad_hist_summary = tf.histogram_summary("{}/grad/hist".format(v.name), g)
                 sparsity_summary = tf.scalar_summary("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
                 grad_summaries.append(grad_hist_summary)
                 grad_summaries.append(sparsity_summary)
         grad_summaries_merged = tf.merge_summary(grad_summaries)
+=======
+                grad_hist_summary = tf.compat.v1.summary.histogram("{}/grad/hist".format(v.name), g)
+                sparsity_summary = tf.compat.v1.summary.scalar("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
+                grad_summaries.append(grad_hist_summary)
+                grad_summaries.append(sparsity_summary)
+        grad_summaries_merged = tf.compat.v1.summary.merge(grad_summaries)
+>>>>>>> Stashed changes
 
         # Output directory for models and summaries
         timestamp = str(int(time.time()))
@@ -92,6 +101,7 @@ with tf.Graph().as_default():
         print("Writing to {}\n".format(out_dir))
 
         # Summaries for loss and accuracy
+<<<<<<< Updated upstream
         loss_summary = tf.scalar_summary("loss", cnn.loss)
         acc_summary = tf.scalar_summary("accuracy", cnn.accuracy)
 
@@ -104,19 +114,33 @@ with tf.Graph().as_default():
         dev_summary_op = tf.merge_summary([loss_summary, acc_summary])
         dev_summary_dir = os.path.join(out_dir, "summaries", "dev")
         dev_summary_writer = tf.train.SummaryWriter(dev_summary_dir, sess.graph)
+=======
+        loss_summary = tf.compat.v1.summary.scalar("loss", cnn.loss)
+        acc_summary = tf.compat.v1.summary.scalar("accuracy", cnn.accuracy)
+
+        # Train Summaries
+        train_summary_op = tf.compat.v1.summary.merge([loss_summary, acc_summary, grad_summaries_merged])
+        train_summary_dir = os.path.join(out_dir, "summaries", "train")
+        train_summary_writer = tf.compat.v1.summary.FileWriter(train_summary_dir, sess.graph)
+
+        # Dev summaries
+        dev_summary_op = tf.compat.v1.summary.merge([loss_summary, acc_summary])
+        dev_summary_dir = os.path.join(out_dir, "summaries", "dev")
+        dev_summary_writer = tf.compat.v1.summary.FileWriter(dev_summary_dir, sess.graph)
+>>>>>>> Stashed changes
 
         # Checkpoint directory. Tensorflow assumes this directory already exists so we need to create it
         checkpoint_dir = os.path.abspath(os.path.join(out_dir, "checkpoints"))
         checkpoint_prefix = os.path.join(checkpoint_dir, "model")
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
-        saver = tf.train.Saver(tf.global_variables())
+        saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
 
         # Write vocabulary
-        vocab_processor.save(os.path.join(out_dir, "vocab"))
+        #vocab_processor.save(os.path.join(out_dir, "vocab"))
 
         # Initialize all variables
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.compat.v1.global_variables_initializer())
 
         def train_step(x_batch, y_batch):
             """
@@ -158,7 +182,7 @@ with tf.Graph().as_default():
         for batch in batches:
             x_batch, y_batch = zip(*batch)
             train_step(x_batch, y_batch)
-            current_step = tf.train.global_step(sess, global_step)
+            current_step = tf.compat.v1.train.global_step(sess, global_step)
             if current_step % FLAGS.evaluate_every == 0:
                 print("\nEvaluation:")
                 dev_step(x_dev, y_dev, writer=dev_summary_writer)

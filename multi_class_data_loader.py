@@ -1,5 +1,7 @@
 import numpy as np
 import csv
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
 
 class MultiClassDataLoader(object):
     """
@@ -20,9 +22,9 @@ class MultiClassDataLoader(object):
 
 
     def define_flags(self):
-        self.__flags.DEFINE_string("train_data_file", "./data/kkk.train", "Data source for the training data.")
-        self.__flags.DEFINE_string("dev_data_file", "./data/kkk.dev", "Data source for the cross validation data.")
-        self.__flags.DEFINE_string("class_data_file", "./data/kkk.cls", "Data source for the class list.")
+        self.__flags.DEFINE_string("train_data_file", "./data/bh_label.train", "Data source for the training data.")
+        self.__flags.DEFINE_string("dev_data_file", "./data/bh_label.test", "Data source for the cross validation data.")
+        self.__flags.DEFINE_string("class_data_file", "./data/bh.cls", "Data source for the class list.")
 
     def prepare_data(self):
         self.__resolve_params()
@@ -33,11 +35,17 @@ class MultiClassDataLoader(object):
         max_doc_len_dev = max([len(doc.decode("utf-8")) for doc in x_dev])
         if max_doc_len_dev > max_doc_len:
             max_doc_len = max_doc_len_dev
+       
         # Build vocabulary
-        self.vocab_processor = self.__data_processor.vocab_processor(x_train, x_dev)
-        x_train = np.array(list(self.vocab_processor.fit_transform(x_train)))
+        self.vocab_processor = self.__data_processor
+        self.vocab_processor.fit_on_texts(x_train)
+        x_train = np.array(pad_sequences(self.vocab_processor.texts_to_sequences(x_train)
+                                         , maxlen=len(self.vocab_processor.word_index)
+                                         , padding='post'))
         # Build vocabulary
-        x_dev = np.array(list(self.vocab_processor.fit_transform(x_dev)))
+        x_dev = np.array(pad_sequences(self.vocab_processor.texts_to_sequences(x_dev)
+                                         , maxlen=len(self.vocab_processor.word_index)
+                                         , padding='post'))
         return [x_train, y_train, x_dev, y_dev]
 
     def restore_vocab_processor(self, vocab_path):
@@ -61,19 +69,27 @@ class MultiClassDataLoader(object):
         x_all = x_train + x_dev
         y_all = np.concatenate([y_train, y_dev], 0)
         return [x_all, y_all]
-
+    
+    def clean_data(_, string):
+        """
+        string : mecab 형태소된 결과
+        """
+        if ":" not in string:
+            string = string.strip().lower()
+        return string
+    
     def __load_data_and_labels(self, data_file):
         x_text = []
         y = []
-        with open(data_file, 'r') as tsvin:
+        with open(data_file, 'r', encoding='utf-8') as tsvin:
             classes = self.__classes()
             one_hot_vectors = np.eye(len(classes), dtype=int)
             class_vectors = {}
             for i, cls in enumerate(classes):
                 class_vectors[cls] = one_hot_vectors[i]
-            tsvin = csv.reader(tsvin, delimiter=',')
+            tsvin = csv.reader(tsvin, delimiter=',')     
             for row in tsvin:
-                data = self.__data_processor.clean_data(row[0])
+                data = self.clean_data(row[0])
                 x_text.append(data)
                 y.append(class_vectors[row[1]])
         return [x_text, np.array(y)]
@@ -81,7 +97,7 @@ class MultiClassDataLoader(object):
     def __classes(self):
         self.__resolve_params()
         if self.__classes_cache is None:
-            with open(self.__class_data_file, 'r') as catin:
+            with open(self.__class_data_file, 'r', encoding='utf-8') as catin:
                 classes = list(catin.readlines())
                 self.__classes_cache = [s.strip() for s in classes]
         return self.__classes_cache
