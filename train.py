@@ -31,7 +31,7 @@ tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many ste
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
-data_loader = MultiClassDataLoader(tf.flags, Tokenizer())
+data_loader = MultiClassDataLoader(tf.flags, Tokenizer(30000))
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
