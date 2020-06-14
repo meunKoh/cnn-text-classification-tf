@@ -31,7 +31,7 @@ tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many ste
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
-data_loader = MultiClassDataLoader(tf.flags, Tokenizer(30000))
+data_loader = MultiClassDataLoader(tf.flags, Tokenizer(30000), max_len=500)
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
@@ -50,7 +50,7 @@ print("Loading data...")
 x_train, y_train, x_dev, y_dev = data_loader.prepare_data()
 vocab_processor = data_loader.vocab_processor
 
-print("Vocabulary Size: {:d}".format(len(vocab_processor.word_index)))
+print("Vocabulary Size: {:d}".format(len(data_loader.__max_len)))
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
 
