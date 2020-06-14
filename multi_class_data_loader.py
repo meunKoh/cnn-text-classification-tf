@@ -12,13 +12,14 @@ class MultiClassDataLoader(object):
 
     Class labels are given as "class_data_file", which is a list of class labels.
     """
-    def __init__(self, flags, data_processor):
+    def __init__(self, flags, data_processor, max_len):
         self.__flags = flags
         self.__data_processor = data_processor
         self.__train_data_file = None
         self.__dev_data_file = None
         self.__class_data_file = None
         self.__classes_cache = None
+        self.__max_len = max_len
 
 
     def define_flags(self):
@@ -40,11 +41,11 @@ class MultiClassDataLoader(object):
         self.vocab_processor = self.__data_processor
         self.vocab_processor.fit_on_texts(x_train)
         x_train = np.array(pad_sequences(self.vocab_processor.texts_to_sequences(x_train)
-                                         , maxlen=len(self.vocab_processor.word_index)
+                                         , maxlen=self.__max_len
                                          , padding='post'))
         # Build vocabulary
         x_dev = np.array(pad_sequences(self.vocab_processor.texts_to_sequences(x_dev)
-                                         , maxlen=len(self.vocab_processor.word_index)
+                                         , maxlen=self.__max_len
                                          , padding='post'))
         return [x_train, y_train, x_dev, y_dev]
 
