@@ -59,7 +59,8 @@ print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 # Training
 # ==================================================
 
-with tf.Graph().as_default():
+with tf.device('/device:GPU:0'):
+    with tf.Graph().as_default():
     session_conf = tf.compat.v1.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement)
@@ -83,7 +84,7 @@ with tf.Graph().as_default():
 
         # Keep track of gradient values and sparsity (optional)
         grad_summaries = []
-        for g, v in grads_and_vars:
+        for g, v in grads_and_vars:         
             if g is not None:
                 grad_hist_summary = tf.compat.v1.summary.histogram("{}/grad/hist".format(v.name), g)
                 sparsity_summary = tf.compat.v1.summary.scalar("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
@@ -119,7 +120,11 @@ with tf.Graph().as_default():
 
         # Write vocabulary
         #vocab_processor.save(os.path.join(out_dir, "vocab"))
-
+        import pickle
+        # saving
+        with open(os.path.join(out_dir, "vocab"), 'wb') as handle:
+            pickle.dump(vocab_processor, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            
         # Initialize all variables
         sess.run(tf.compat.v1.global_variables_initializer())
 
