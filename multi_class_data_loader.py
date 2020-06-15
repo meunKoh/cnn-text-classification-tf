@@ -24,13 +24,15 @@ class MultiClassDataLoader(object):
 
     def define_flags(self):
         self.__flags.DEFINE_string("train_data_file", "./data/bh_big.train", "Data source for the training data.")
-        self.__flags.DEFINE_string("dev_data_file", "./data/bh_big.test", "Data source for the cross validation data.")
+        self.__flags.DEFINE_string("dev_data_file", "./data/bh_big.dev", "Data source for the cross validation data.")
+        self.__flags.DEFINE_string("test_data_file", "./data/bh_big.test", "Data source for the test data.")
         self.__flags.DEFINE_string("class_data_file", "./data/bh_big.cls", "Data source for the class list.")
 
     def prepare_data(self):
         self.__resolve_params()
         x_train, y_train = self.__load_data_and_labels(self.__train_data_file)
         x_dev, y_dev = self.__load_data_and_labels(self.__dev_data_file)
+        x_test, y_test = self.__load_data_and_labels(self.__test_data_file)
 
         max_doc_len = max([len(doc) for doc in x_train])
         max_doc_len_dev = max([len(doc) for doc in x_dev])
@@ -47,7 +49,12 @@ class MultiClassDataLoader(object):
         x_dev = np.array(pad_sequences(self.vocab_processor.texts_to_sequences(x_dev)
                                          , maxlen=self.__max_len
                                          , padding='post'))
-        return [x_train, y_train, x_dev, y_dev]
+        
+        # Build vocabulary
+        x_test = np.array(pad_sequences(self.vocab_processor.texts_to_sequences(x_test)
+                                         , maxlen=self.__max_len
+                                         , padding='post'))
+        return [x_train, y_train, x_dev, y_dev, x_test, y_test]
 
     def restore_vocab_processor(self, vocab_path):
         return self.__data_processor.restore_vocab_processor(vocab_path)
