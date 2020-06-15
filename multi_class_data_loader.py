@@ -115,4 +115,5 @@ class MultiClassDataLoader(object):
         if self.__class_data_file is None:
             self.__train_data_file = self.__flags.FLAGS.train_data_file
             self.__dev_data_file = self.__flags.FLAGS.dev_data_file
+            self.__test_data_file = self.__flags.FLAGS.test_data_file
             self.__class_data_file = self.__flags.FLAGS.class_data_file
