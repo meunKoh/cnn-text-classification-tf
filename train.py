@@ -5,6 +5,7 @@ import tensorflow as tf
 import os
 import sys
 import time
+import numpy as np
 import datetime
 import data_helpers
 from text_cnn import TextCNN
@@ -27,11 +28,14 @@ tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 200, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
+tf.flags.DEFINE_integer("patience", 7, "early-stops after this patience (default: 7)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
-data_loader = MultiClassDataLoader(tf.flags, Tokenizer(30000))
+max_len = 500
+vocab_size = 30000
+data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size), max_len=max_len)
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
@@ -50,12 +54,13 @@ print("Loading data...")
 x_train, y_train, x_dev, y_dev = data_loader.prepare_data()
 vocab_processor = data_loader.vocab_processor
 
-print("Vocabulary Size: {:d}".format(len(vocab_processor.word_index)))
+print("Vocabulary Size: {:d}".format(len(data_loader.vocab_processor.word_index)))
 print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
 
 
 # Training
 # ==================================================
+
 
 with tf.Graph().as_default():
     session_conf = tf.compat.v1.ConfigProto(
@@ -66,11 +71,12 @@ with tf.Graph().as_default():
         cnn = TextCNN(
             sequence_length=x_train.shape[1],
             num_classes=y_train.shape[1],
-            vocab_size=len(vocab_processor.word_index)+1,
-                embedding_size=FLAGS.embedding_dim,
-                filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
-                num_filters=FLAGS.num_filters,
-                l2_reg_lambda=FLAGS.l2_reg_lambda)
+            vocab_size = vocab_size,
+            #vocab_size=len(vocab_processor.word_index)+1,
+            embedding_size=FLAGS.embedding_dim,
+            filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
+            num_filters=FLAGS.num_filters,
+            l2_reg_lambda=FLAGS.l2_reg_lambda)
 
         # Define Training procedure
         global_step = tf.Variable(0, name="global_step", trainable=False)
@@ -80,7 +86,7 @@ with tf.Graph().as_default():
 
         # Keep track of gradient values and sparsity (optional)
         grad_summaries = []
-        for g, v in grads_and_vars:
+        for g, v in grads_and_vars:         
             if g is not None:
                 grad_hist_summary = tf.compat.v1.summary.histogram("{}/grad/hist".format(v.name), g)
                 sparsity_summary = tf.compat.v1.summary.scalar("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
@@ -115,7 +121,9 @@ with tf.Graph().as_default():
         saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
 
         # Write vocabulary
-        #vocab_processor.save(os.path.join(out_dir, "vocab"))
+        import pickle
+        with open(os.path.join(out_dir, "vocab.pickle"), 'wb') as handle:
+            pickle.dump(vocab_processor, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
         # Initialize all variables
         sess.run(tf.compat.v1.global_variables_initializer())
@@ -133,7 +141,10 @@ with tf.Graph().as_default():
                 [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
                 feed_dict)
             time_str = datetime.datetime.now().isoformat()
-            print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+            
+            if step % int(FLAGS.evaluate_every/2) == 0:
+                print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+                
             train_summary_writer.add_summary(summaries, step)
 
         def dev_step(x_batch, y_batch, writer=None):
@@ -152,19 +163,36 @@ with tf.Graph().as_default():
             print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
             if writer:
                 writer.add_summary(summaries, step)
+            return loss
 
         # Generate batches
         batches = data_helpers.batch_iter(
             list(zip(x_train, y_train)), FLAGS.batch_size, FLAGS.num_epochs)
+        
         # Training loop. For each batch...
+        val_loss_min = np.Inf
+        patience = FLAGS.patience
+        early_stopping_counter = 0
+        train_start = datetime.datetime.now()
+        train_end = datetime.datetime.now()
         for batch in batches:
             x_batch, y_batch = zip(*batch)
             train_step(x_batch, y_batch)
             current_step = tf.compat.v1.train.global_step(sess, global_step)
             if current_step % FLAGS.evaluate_every == 0:
                 print("\nEvaluation:")
-                dev_step(x_dev, y_dev, writer=dev_summary_writer)
+                curr_loss = dev_step(x_dev, y_dev, writer=dev_summary_writer)
+                if curr_loss < val_loss_min:
+                    val_loss_min = curr_loss
+                    early_stopping_counter = 0
+                    train_end = datetime.datetime.now()
+                    path = saver.save(sess, checkpoint_prefix, global_step=current_step)
+                    print("Saved model checkpoint to {}\n".format(path))
+                elif curr_loss >= val_loss_min:
+                    early_stopping_counter += 1
+                    if early_stopping_counter == patience:
+                        total_train = (train_end - train_start).total_seconds()
+                        print('total train time:', str(total_train),'s')
+                        break
                 print("")
-            if current_step % FLAGS.checkpoint_every == 0:
-                path = saver.save(sess, checkpoint_prefix, global_step=current_step)
-                print("Saved model checkpoint to {}\n".format(path))
+                
