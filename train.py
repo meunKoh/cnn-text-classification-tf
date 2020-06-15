@@ -51,11 +51,11 @@ print("")
 
 # Load data
 print("Loading data...")
-x_train, y_train, x_dev, y_dev = data_loader.prepare_data()
+x_train, y_train, x_dev, y_dev, x_test, y_test = data_loader.prepare_data()
 vocab_processor = data_loader.vocab_processor
 
 print("Vocabulary Size: {:d}".format(len(data_loader.vocab_processor.word_index)))
-print("Train/Dev split: {:d}/{:d}".format(len(y_train), len(y_dev)))
+print("Train/Valid/Test split: {:d}/{:d}/{:d}".format(len(y_train), len(y_dev), len(y_test))
 
 
 # Training
@@ -72,7 +72,6 @@ with tf.Graph().as_default():
             sequence_length=x_train.shape[1],
             num_classes=y_train.shape[1],
             vocab_size = vocab_size,
-            #vocab_size=len(vocab_processor.word_index)+1,
             embedding_size=FLAGS.embedding_dim,
             filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
             num_filters=FLAGS.num_filters,
@@ -175,6 +174,7 @@ with tf.Graph().as_default():
         early_stopping_counter = 0
         train_start = datetime.datetime.now()
         train_end = datetime.datetime.now()
+        
         for batch in batches:
             x_batch, y_batch = zip(*batch)
             train_step(x_batch, y_batch)
@@ -182,17 +182,23 @@ with tf.Graph().as_default():
             if current_step % FLAGS.evaluate_every == 0:
                 print("\nEvaluation:")
                 curr_loss = dev_step(x_dev, y_dev, writer=dev_summary_writer)
-                if curr_loss < val_loss_min:
+                if curr_loss <= val_loss_min:
                     val_loss_min = curr_loss
                     early_stopping_counter = 0
                     train_end = datetime.datetime.now()
                     path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                     print("Saved model checkpoint to {}\n".format(path))
-                elif curr_loss >= val_loss_min:
+                elif curr_loss > val_loss_min:
                     early_stopping_counter += 1
+                    print('early stopping counter:', str(early_stopping_counter))
                     if early_stopping_counter == patience:
                         total_train = (train_end - train_start).total_seconds()
+                        print('early stopping')
                         print('total train time:', str(total_train),'s')
+      
+                        print("\nTest Evaluation:")
+                        test_loss = dev_step(x_test, y_test, writer=dev_summary_writer)
+                        print('test loss:', test_loss)
                         break
                 print("")
                 
