@@ -187,6 +187,9 @@ with tf.Graph().as_default():
                     train_end = datetime.datetime.now()
                     path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                     print("Saved model checkpoint to {}\n".format(path))
+                    print("\nTest Evaluation:")
+                    test_loss = dev_step(x_test, y_test, writer=dev_summary_writer)
+                    print('test loss:', test_loss)
                 elif curr_loss > val_loss_min:
                     early_stopping_counter += 1
                     print('early stopping counter:', str(early_stopping_counter))
@@ -194,10 +197,6 @@ with tf.Graph().as_default():
                         total_train = (train_end - train_start).total_seconds()
                         print('early stopping')
                         print('total train time:', str(total_train),'s')
-      
-                        print("\nTest Evaluation:")
-                        test_loss = dev_step(x_test, y_test, writer=dev_summary_writer)
-                        print('test loss:', test_loss)
                         break
                 print("")
                 
