@@ -17,6 +17,7 @@ class MultiClassDataLoader(object):
         self.__data_processor = data_processor
         self.__train_data_file = None
         self.__dev_data_file = None
+        self.__test_data_file = None
         self.__class_data_file = None
         self.__classes_cache = None
         self.__max_len = max_len
