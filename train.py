@@ -55,12 +55,11 @@ x_train, y_train, x_dev, y_dev, x_test, y_test = data_loader.prepare_data()
 vocab_processor = data_loader.vocab_processor
 
 print("Vocabulary Size: {:d}".format(len(data_loader.vocab_processor.word_index)))
-print("Train/Valid/Test split: {:d}/{:d}/{:d}".format(len(y_train), len(y_dev), len(y_test))
+print("Train/Valid/Test split: {:d}/{:d}/{:d}".format(len(y_train), len(y_dev), len(y_test)))
 
 
 # Training
 # ==================================================
-
 
 with tf.Graph().as_default():
     session_conf = tf.compat.v1.ConfigProto(
