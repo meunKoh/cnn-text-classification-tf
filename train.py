@@ -184,14 +184,15 @@ with tf.Graph().as_default():
                 curr_loss = dev_step(x_dev, y_dev, writer=dev_summary_writer)
                 if curr_loss < val_loss_min:
                     val_loss_min = curr_loss
+                    early_stopping_counter = 0
                     train_end = datetime.datetime.now()
                     path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                     print("Saved model checkpoint to {}\n".format(path))
                 elif curr_loss >= val_loss_min:
                     early_stopping_counter += 1
                     if early_stopping_counter == patience:
-                        break
                         total_train = (train_end - train_start).total_seconds()
                         print('total train time:', str(total_train),'s')
+                        break
                 print("")
                 
