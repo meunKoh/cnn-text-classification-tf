@@ -32,7 +32,8 @@ tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device 
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 max_len = 500
-data_loader = MultiClassDataLoader(tf.flags, Tokenizer(30000), max_len=max_len)
+vocab_size = 30000
+data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size), max_len=max_len)
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
@@ -67,11 +68,12 @@ with tf.Graph().as_default():
         cnn = TextCNN(
             sequence_length=x_train.shape[1],
             num_classes=y_train.shape[1],
-            vocab_size=len(vocab_processor.word_index)+1,
-                embedding_size=FLAGS.embedding_dim,
-                filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
-                num_filters=FLAGS.num_filters,
-                l2_reg_lambda=FLAGS.l2_reg_lambda)
+            vocab_size = vocab_size,
+            #vocab_size=len(vocab_processor.word_index)+1,
+            embedding_size=FLAGS.embedding_dim,
+            filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
+            num_filters=FLAGS.num_filters,
+            l2_reg_lambda=FLAGS.l2_reg_lambda)
 
         # Define Training procedure
         global_step = tf.Variable(0, name="global_step", trainable=False)
