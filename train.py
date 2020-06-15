@@ -5,6 +5,7 @@ import tensorflow as tf
 import os
 import sys
 import time
+import numpy as np
 import datetime
 import data_helpers
 from text_cnn import TextCNN
@@ -27,6 +28,7 @@ tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
 tf.flags.DEFINE_integer("num_epochs", 200, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
+tf.flags.DEFINE_integer("patience", 7, "early-stops after this patience (default: 7)")
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
@@ -119,7 +121,6 @@ with tf.Graph().as_default():
         saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
 
         # Write vocabulary
-        #vocab_processor.save(os.path.join(out_dir, "vocab"))
         import pickle
         with open(os.path.join(out_dir, "vocab.pickle"), 'wb') as handle:
             pickle.dump(vocab_processor, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -140,7 +141,10 @@ with tf.Graph().as_default():
                 [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
                 feed_dict)
             time_str = datetime.datetime.now().isoformat()
-            print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+            
+            if step % int(FLAGS.evaluate_every/2) == 0:
+                print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+                
             train_summary_writer.add_summary(summaries, step)
 
         def dev_step(x_batch, y_batch, writer=None):
@@ -159,19 +163,35 @@ with tf.Graph().as_default():
             print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
             if writer:
                 writer.add_summary(summaries, step)
+            return loss
 
         # Generate batches
         batches = data_helpers.batch_iter(
             list(zip(x_train, y_train)), FLAGS.batch_size, FLAGS.num_epochs)
+        
         # Training loop. For each batch...
+        val_loss_min = np.Inf
+        patience = FLAGS.patience
+        early_stopping_counter = 0
+        train_start = datetime.datetime.now()
+        train_end = datetime.datetime.now()
         for batch in batches:
             x_batch, y_batch = zip(*batch)
             train_step(x_batch, y_batch)
             current_step = tf.compat.v1.train.global_step(sess, global_step)
             if current_step % FLAGS.evaluate_every == 0:
                 print("\nEvaluation:")
-                dev_step(x_dev, y_dev, writer=dev_summary_writer)
+                curr_loss = dev_step(x_dev, y_dev, writer=dev_summary_writer)
+                if curr_loss < val_loss_min:
+                    val_loss_min = curr_loss
+                    train_end = datetime.datetime.now()
+                    path = saver.save(sess, checkpoint_prefix, global_step=current_step)
+                    print("Saved model checkpoint to {}\n".format(path))
+                elif curr_loss >= val_loss_min:
+                    early_stopping_counter += 1
+                    if early_stopping_counter == patience:
+                        break
+                        total_train = (train_end - train_start).total_seconds()
+                        print('total train time:', str(total_train),'s')
                 print("")
-            if current_step % FLAGS.checkpoint_every == 0:
-                path = saver.save(sess, checkpoint_prefix, global_step=current_step)
-                print("Saved model checkpoint to {}\n".format(path))
+                
