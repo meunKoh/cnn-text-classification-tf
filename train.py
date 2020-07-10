@@ -61,7 +61,7 @@ print("Train/Valid/Test split: {:d}/{:d}/{:d}".format(len(y_train), len(y_dev), 
 # Training
 # ==================================================
 
-with tf.Graph().as_default():
+with tf.device('/device:GPU:0'), tf.Graph().as_default():
     session_conf = tf.compat.v1.ConfigProto(
       allow_soft_placement=FLAGS.allow_soft_placement,
       log_device_placement=FLAGS.log_device_placement)
