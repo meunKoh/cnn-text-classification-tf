@@ -33,7 +33,7 @@ tf.flags.DEFINE_integer("patience", 7, "early-stops after this patience (default
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
-max_len = 300
+max_len = 500
 vocab_size = 30000
 data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size), max_len=max_len)
 data_loader.define_flags()

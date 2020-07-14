@@ -24,10 +24,10 @@ class MultiClassDataLoader(object):
 
 
     def define_flags(self):
-        self.__flags.DEFINE_string("train_data_file", "./data/bh.good13.small.train", "Data source for the training data.")
-        self.__flags.DEFINE_string("dev_data_file", "./data/bh.good13.small.dev", "Data source for the cross validation data.")
-        self.__flags.DEFINE_string("test_data_file", "./data/bh.good13.small.test", "Data source for the test data.")
-        self.__flags.DEFINE_string("class_data_file", "./data/bh.good13.cls", "Data source for the class list.")
+        self.__flags.DEFINE_string("train_data_file", "./data/bh.good3.sp30k.train", "Data source for the training data.")
+        self.__flags.DEFINE_string("dev_data_file", "./data/bh.good13.sp30k.dev", "Data source for the cross validation data.")
+        self.__flags.DEFINE_string("test_data_file", "./data/bh.good13.sp30k.test", "Data source for the test data.")
+        self.__flags.DEFINE_string("class_data_file", "./data/bh.good3.cls", "Data source for the class list.")
 
     def prepare_data(self):
         self.__resolve_params()
@@ -81,7 +81,7 @@ class MultiClassDataLoader(object):
     
     def clean_data(_, string):
         """
-        string : mecab 형태소된 결과
+        string : 형태소 분리된 결과
         """
         if ":" not in string:
             string = string.strip().lower()
