@@ -35,7 +35,8 @@ tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on 
 
 max_len = 500
 vocab_size = 30000
-data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size), max_len=max_len)
+oov_token = '<UNK>'
+data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size, oov_token=oov_token), max_len=max_len)
 data_loader.define_flags()
 
 FLAGS = tf.flags.FLAGS
