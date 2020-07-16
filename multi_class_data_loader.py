@@ -15,10 +15,10 @@ class MultiClassDataLoader(object):
     def __init__(self, flags, data_processor, max_len):
         self.__flags = flags
         self.__data_processor = data_processor
-        self.__train_data_file = flags.train_corpus_path
-        self.__dev_data_file = flags.train_corpus_path
-        self.__test_data_file = flags.train_corpus_path
-        self.__class_data_file = flags.class_data_path
+        self.__train_data_file = None
+        self.__dev_data_file = None
+        self.__test_data_file = None
+        self.__class_data_file = None
         self.__classes_cache = None
         self.__max_len = max_len
 
@@ -113,7 +113,7 @@ class MultiClassDataLoader(object):
 
     def __resolve_params(self):
         if self.__class_data_file is None:
-            self.__train_data_file = self.__flags.FLAGS.train_data_file
-            self.__dev_data_file = self.__flags.FLAGS.dev_data_file
-            self.__test_data_file = self.__flags.FLAGS.test_data_file
-            self.__class_data_file = self.__flags.FLAGS.class_data_file
+            self.__train_data_file = self.__flags.FLAGS.train_corpus_path
+            self.__dev_data_file = self.__flags.FLAGS.dev_corpus_path
+            self.__test_data_file = self.__flags.FLAGS.test_corpus_path
+            self.__class_data_file = self.__flags.FLAGS.class_data_path
