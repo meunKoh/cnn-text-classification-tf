@@ -24,6 +24,7 @@ def main(args):
 
     # Tokenizer
     tf.flags.DEFINE_string("tokenizer_type", args.tokenizer_type, "mecab/sp/kobert")
+    tf.flags.DEFINE_string("vocab_size", args.vocab_size, "Number of vocabulary")
 
     # Model Hyperparameters
     tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
@@ -63,7 +64,8 @@ def main(args):
     x_train, y_train, x_dev, y_dev, x_test, y_test = data_loader.prepare_data()
     vocab_processor = data_loader.vocab_processor
 
-    print("Vocabulary Size: {:d}".format(len(data_loader.vocab_processor.word_index)))
+    print("Vocabulary in Total: {:d}".format(len(data_loader.vocab_processor.word_index)))
+    print("Vocabulary Size: {:d}".format(vocab_size)
     print("Train/Valid/Test split: {:d}/{:d}/{:d}".format(len(y_train), len(y_dev), len(y_test)))
 
 
@@ -215,7 +217,7 @@ if __name__ == '__main__':
     parser.add_argument('--dev_corpus_path', type=str, required=True, help="dev txt file path")
     parser.add_argument('--test_corpus_path', type=str, required=True, help="test txt file path")
     parser.add_argument('--class_data_path', type=str, required=True, help="Data source for the class list")
-    parser.add_argument('--tokenizer_type', type=str, required=True, help="mecab/sp/kobert")
+    parser.add_argument('--tokenizer_type', type=str, help="mecab/sp/kobert")
 
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=7,
