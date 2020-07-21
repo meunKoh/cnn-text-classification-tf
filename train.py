@@ -10,19 +10,21 @@ import datetime
 import data_helpers
 from text_cnn import TextCNN
 from multi_class_data_loader import MultiClassDataLoader
-from word_data_processor import WordDataProcessor
 from tensorflow.keras.preprocessing.text import Tokenizer
     
 def main(args):
     
     # Parameters
     # ==================================================
-    # data
+    # Data
     tf.flags.DEFINE_string("train_corpus_path", args.train_corpus_path, "train txt file path")
     tf.flags.DEFINE_string("dev_corpus_path", args.dev_corpus_path, "dev txt file path")
     tf.flags.DEFINE_string("test_corpus_path", args.test_corpus_path, "test txt file path")
     tf.flags.DEFINE_string("class_data_path", args.class_data_path, "Data source for the class list")
-    
+
+    # Tokenizer
+    tf.flags.DEFINE_string("tokenizer_type", args.tokenizer_type, "mecab/sp/kobert")
+
     # Model Hyperparameters
     tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
     tf.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes (default: '3,4,5')")
@@ -40,12 +42,6 @@ def main(args):
     tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
     tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
-    max_len = args.max_len
-    vocab_size = args.vocab_size # default 30000
-    oov_token = '<UNK>'
-    data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size, oov_token=oov_token), max_len=max_len)
-    #data_loader.define_flags()
-
     FLAGS = tf.flags.FLAGS
     FLAGS(sys.argv)
     print("\nParameters:")
@@ -53,8 +49,15 @@ def main(args):
         print("{}={}".format(attr.upper(), value))
     print("")
 
+    # Tokenizer Preparation
+    max_len = args.max_len
 
-    # Data Preparatopn
+    if tf.flags.
+    vocab_size = args.vocab_size  # default 30000
+    oov_token = '<UNK>'
+    data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size, oov_token=oov_token), max_len=max_len)
+
+    # Data Preparation
     # ==================================================
 
     # Load data
@@ -214,6 +217,8 @@ if __name__ == '__main__':
     parser.add_argument('--dev_corpus_path', type=str, required=True, help="dev txt file path")
     parser.add_argument('--test_corpus_path', type=str, required=True, help="test txt file path")
     parser.add_argument('--class_data_path', type=str, required=True, help="Data source for the class list")
+    parser.add_argument('--tokenizer_type', type=str, required=True, help="mecab/sp/kobert")
+
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=7,
                         help="Number of epochs before stopping once your loss stops improving")

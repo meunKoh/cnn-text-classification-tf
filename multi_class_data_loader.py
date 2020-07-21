@@ -1,5 +1,5 @@
 import numpy as np
-import csv
+#import csv
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 
@@ -20,25 +20,14 @@ class MultiClassDataLoader(object):
         self.__test_data_file = None
         self.__class_data_file = None
         self.__classes_cache = None
+        self.__tokenizer_type = None
         self.__max_len = max_len
-
-
-    def define_flags(self):
-        self.__flags.DEFINE_string("train_data_file", "./data/bh.good3.mecab+sp30k.pre.train", "Data source for the training data.")
-        self.__flags.DEFINE_string("dev_data_file", "./data/bh.good3.mecab+sp30k.pre.dev", "Data source for the cross validation data.")
-        self.__flags.DEFINE_string("test_data_file", "./data/bh.good3.mecab+sp30k.pre.test", "Data source for the test data.")
-        self.__flags.DEFINE_string("class_data_file", "./data/bh.good3.cls", "Data source for the class list.")
 
     def prepare_data(self):
         self.__resolve_params()
         x_train, y_train = self.__load_data_and_labels(self.__train_data_file)
         x_dev, y_dev = self.__load_data_and_labels(self.__dev_data_file)
         x_test, y_test = self.__load_data_and_labels(self.__test_data_file)
-
-        max_doc_len = max([len(doc) for doc in x_train])
-        max_doc_len_dev = max([len(doc) for doc in x_dev])
-        if max_doc_len_dev > max_doc_len:
-            max_doc_len = max_doc_len_dev
        
         # Build vocabulary
         self.vocab_processor = self.__data_processor
@@ -56,9 +45,6 @@ class MultiClassDataLoader(object):
                                          , maxlen=self.__max_len
                                          , padding='post'))
         return [x_train, y_train, x_dev, y_dev, x_test, y_test]
-
-    def restore_vocab_processor(self, vocab_path):
-        return self.__data_processor.restore_vocab_processor(vocab_path)
 
     def class_labels(self, class_indexes):
         return [ self.__classes()[idx] for idx in class_indexes ]
@@ -80,9 +66,6 @@ class MultiClassDataLoader(object):
         return [x_all, y_all]
     
     def clean_data(_, string):
-        """
-        string : 형태소 분리된 결과
-        """
         if ":" not in string:
             string = string.strip().lower()
         return string
@@ -96,11 +79,13 @@ class MultiClassDataLoader(object):
             class_vectors = {}
             for i, cls in enumerate(classes):
                 class_vectors[cls] = one_hot_vectors[i]
-            tsvin = csv.reader(tsvin, delimiter=',')     
+
+            tsvin = tsvin.readlines()
             for row in tsvin:
-                data = self.clean_data(row[0])
+                idx = row.rfind(',')
+                data = self.clean_data(row[:idx])
                 x_text.append(data)
-                y.append(class_vectors[row[1]])
+                y.append(class_vectors[row[idx+1:]])
         return [x_text, np.array(y)]
 
     def __classes(self):
@@ -117,3 +102,6 @@ class MultiClassDataLoader(object):
             self.__dev_data_file = self.__flags.FLAGS.dev_corpus_path
             self.__test_data_file = self.__flags.FLAGS.test_corpus_path
             self.__class_data_file = self.__flags.FLAGS.class_data_path
+        if self.__tokenizer_type is None:
+            self.__tokenizer_type = self.__flags.FLAGS.tokenizer_type
+
