@@ -51,8 +51,6 @@ def main(args):
 
     # Tokenizer Preparation
     max_len = args.max_len
-
-    if tf.flags.
     vocab_size = args.vocab_size  # default 30000
     oov_token = '<UNK>'
     data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size, oov_token=oov_token), max_len=max_len)
