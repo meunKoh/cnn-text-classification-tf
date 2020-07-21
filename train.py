@@ -24,7 +24,7 @@ def main(args):
 
     # Tokenizer
     tf.flags.DEFINE_string("tokenizer_type", args.tokenizer_type, "mecab/sp/kobert")
-    tf.flags.DEFINE_string("vocab_size", args.vocab_size, "Number of vocabulary")
+    tf.flags.DEFINE_integer("vocab_size", args.vocab_size, "Number of vocabulary")
 
     # Model Hyperparameters
     tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
