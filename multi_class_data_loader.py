@@ -82,6 +82,7 @@ class MultiClassDataLoader(object):
 
             tsvin = tsvin.readlines()
             for row in tsvin:
+                row = row.replace('\n', '')
                 idx = row.rfind(',')
                 data = self.clean_data(row[:idx])
                 x_text.append(data)
