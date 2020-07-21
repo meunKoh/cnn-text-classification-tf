@@ -65,7 +65,7 @@ def main(args):
     vocab_processor = data_loader.vocab_processor
 
     print("Vocabulary in Total: {:d}".format(len(data_loader.vocab_processor.word_index)))
-    print("Vocabulary Size: {:d}".format(vocab_size)
+    print("Vocabulary Size: {:d}".format(vocab_size))
     print("Train/Valid/Test split: {:d}/{:d}/{:d}".format(len(y_train), len(y_dev), len(y_test)))
 
 
