@@ -18,7 +18,7 @@ class VocabProcessor(object):
         self.__max_len = max_len
 
     def process_texts(self, x_train, y_train, x_dev, y_dev, x_test, y_test):
-        return self.__process_with_tokenizer(self, x_train, y_train, x_dev, y_dev, x_test, y_test)
+        return self.__process_with_tokenizer(x_train, y_train, x_dev, y_dev, x_test, y_test)
 
     def process_with_Tokenizer(self, x_train, y_train, x_dev, y_dev, x_test, y_test):
         # Build vocabulary
