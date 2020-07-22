@@ -54,7 +54,6 @@ def main(args):
     # Tokenizer Preparation
     #max_len = args.max_len
     vocab_size = args.vocab_size  # default 30000
-    oov_token = '[UNK]' #Tokenizer(vocab_size+1, oov_token=oov_token)
     data_loader = MultiClassDataLoader(tf.flags)
 
     # Data Preparation
@@ -63,16 +62,13 @@ def main(args):
     # Load data
     print("Loading data...")
     x_train, y_train, x_dev, y_dev, x_test, y_test = data_loader.prepare_data()
-    vocab_processor = data_loader.vocab_processor
-
-    print("Vocabulary in Total: {:d}".format(len(data_loader.vocab_processor.word_index)))
+    #vocab_processor = data_loader.vocab_processor
+    #print("Vocabulary in Total: {:d}".format(len(data_loader.vocab_processor.word_index)))
     print("Vocabulary Size: {:d}".format(vocab_size))
     print("Train/Valid/Test split: {:d}/{:d}/{:d}".format(len(y_train), len(y_dev), len(y_test)))
 
-
     # Training
     # ==================================================
-
     with tf.device('/device:GPU:0'), tf.Graph().as_default():
         session_conf = tf.compat.v1.ConfigProto(
           allow_soft_placement=FLAGS.allow_soft_placement,
