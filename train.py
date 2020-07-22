@@ -127,9 +127,10 @@ def main(args):
             saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
 
             # Write vocabulary
-            import pickle
-            with open(os.path.join(out_dir, "vocab.pickle"), 'wb') as handle:
-                pickle.dump(vocab_processor, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            """
+                add code 
+            """
+
 
             # Initialize all variables
             sess.run(tf.compat.v1.global_variables_initializer())
@@ -214,7 +215,7 @@ if __name__ == '__main__':
     parser.add_argument('--dev_corpus_path', type=str, required=True, help="dev txt file path")
     parser.add_argument('--test_corpus_path', type=str, required=True, help="test txt file path")
     parser.add_argument('--class_data_path', type=str, required=True, help="Data source for the class list")
-    parser.add_argument('--tokenizer_type', type=str, help="mecab/sp/kobert")
+    parser.add_argument('--tokenizer_type', type=str, required=True, help="mecab/sp/kobert")
 
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=7,

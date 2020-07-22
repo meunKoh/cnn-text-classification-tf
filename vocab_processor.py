@@ -1,10 +1,6 @@
 import numpy as np
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-import sentencepiece as spm
-import gluonnlp as nlp
-from kobert.utils import get_tokenizer
-from kobert.pytorch_kobert import get_pytorch_kobert_model
 
 
 class VocabProcessor(object):
@@ -42,6 +38,7 @@ class VocabProcessor(object):
         return [x_train, y_train, x_dev, y_dev, x_test, y_test]
 
     def process_with_Sentencepiece(self, x_train, y_train, x_dev, y_dev, x_test, y_test):
+        import sentencepiece as spm
         # Load tokenizer
         sp_model_path = './tokenizers/sp-up-good3-30k.model'
         sp_tokenizer = spm.SentencePieceProcessor()
@@ -63,6 +60,10 @@ class VocabProcessor(object):
         return [x_train, y_train, x_dev, y_dev, x_test, y_test]
 
     def process_with_kobert(self, x_train, y_train, x_dev, y_dev, x_test, y_test):
+        import gluonnlp as nlp
+        from kobert.utils import get_tokenizer
+        from kobert.pytorch_kobert import get_pytorch_kobert_model
+
         # Build vocabulary
         bertmodel, vocab = get_pytorch_kobert_model()
         tokenizer = get_tokenizer()
