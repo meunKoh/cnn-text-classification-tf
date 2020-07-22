@@ -25,6 +25,7 @@ def main(args):
     # Tokenizer
     tf.flags.DEFINE_string("tokenizer_type", args.tokenizer_type, "mecab/sp/kobert")
     tf.flags.DEFINE_integer("vocab_size", args.vocab_size, "Number of vocabulary")
+    tf.flags.DEFINE_integer("max_len", args.max_len, "maximum sequence length")
 
     # Model Hyperparameters
     tf.flags.DEFINE_integer("embedding_dim", 128, "Dimensionality of character embedding (default: 128)")
@@ -51,10 +52,10 @@ def main(args):
     print("")
 
     # Tokenizer Preparation
-    max_len = args.max_len
+    #max_len = args.max_len
     vocab_size = args.vocab_size  # default 30000
-    oov_token = '<UNK>'
-    data_loader = MultiClassDataLoader(tf.flags, Tokenizer(vocab_size, oov_token=oov_token), max_len=max_len)
+    oov_token = '[UNK]' #Tokenizer(vocab_size+1, oov_token=oov_token)
+    data_loader = MultiClassDataLoader(tf.flags)
 
     # Data Preparation
     # ==================================================
