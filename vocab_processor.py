@@ -59,6 +59,28 @@ class VocabProcessor(object):
                                         , value=1))
         return [x_train, y_train, x_dev, y_dev, x_test, y_test]
 
+    def process_with_Mecab_Sentencepiece(self, x_train, y_train, x_dev, y_dev, x_test, y_test):
+        import sentencepiece as spm
+        # Load tokenizer
+        sp_model_path = './tokenizers/mecab+sp-up-good3-30k.model'
+        sp_tokenizer = spm.SentencePieceProcessor()
+        sp_tokenizer.load(sp_model_path)
+
+        # transform
+        x_train = np.array(pad_sequences([sp_tokenizer.encode_as_ids(data) for data in x_train]
+                                         , maxlen=self.__max_len
+                                         , padding='post'
+                                         , value=1))
+        x_dev = np.array(pad_sequences([sp_tokenizer.encode_as_ids(data) for data in x_dev]
+                                       , maxlen=self.__max_len
+                                       , padding='post'
+                                       , value=1))
+        x_test = np.array(pad_sequences([sp_tokenizer.encode_as_ids(data) for data in x_test]
+                                        , maxlen=self.__max_len
+                                        , padding='post'
+                                        , value=1))
+        return [x_train, y_train, x_dev, y_dev, x_test, y_test]
+
     def process_with_kobert(self, x_train, y_train, x_dev, y_dev, x_test, y_test):
         import gluonnlp as nlp
         from kobert.utils import get_tokenizer

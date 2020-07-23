@@ -1,3 +1,0 @@
-politics
-entertain
-etc
