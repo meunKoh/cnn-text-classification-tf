@@ -22,7 +22,7 @@ def main(args):
     tf.flags.DEFINE_string("class_data_path", args.class_data_path, "Data source for the class list")
 
     # Tokenizer
-    tf.flags.DEFINE_string("tokenizer_type", args.tokenizer_type, "mecab/sp/kobert")
+    tf.flags.DEFINE_string("tokenizer_type", args.tokenizer_type, "mecab/sp/mesp/kobert")
     tf.flags.DEFINE_integer("vocab_size", args.vocab_size, "Number of vocabulary")
     tf.flags.DEFINE_integer("max_len", args.max_len, "maximum sequence length")
 
@@ -129,7 +129,6 @@ def main(args):
                 add code 
             """
 
-
             # Initialize all variables
             sess.run(tf.compat.v1.global_variables_initializer())
 
@@ -213,7 +212,7 @@ if __name__ == '__main__':
     parser.add_argument('--dev_corpus_path', type=str, required=True, help="dev txt file path")
     parser.add_argument('--test_corpus_path', type=str, required=True, help="test txt file path")
     parser.add_argument('--class_data_path', type=str, required=True, help="Data source for the class list")
-    parser.add_argument('--tokenizer_type', type=str, required=True, help="mecab/sp/kobert")
+    parser.add_argument('--tokenizer_type', type=str, required=True, help="mecab/sp/mesp/kobert")
 
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=7,

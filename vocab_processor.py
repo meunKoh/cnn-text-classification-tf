@@ -9,6 +9,7 @@ class VocabProcessor(object):
         tokenizer_map = {
             'mecab': self.process_with_Tokenizer,
             'sp': self.process_with_Sentencepiece,
+            'mesp' : self.process_with_Mecab_Sentencepiece,
             'kobert': self.process_with_kobert
         }
 
