@@ -22,7 +22,7 @@ def main(args):
     tf.flags.DEFINE_string("class_data_path", args.class_data_path, "Data source for the class list")
 
     # Tokenizer
-    tf.flags.DEFINE_string("tokenizer_type", args.tokenizer_type, "mecab/sp/mesp/kobert")
+    tf.flags.DEFINE_string("tokenizer_name", args.tokenizer_name, "mecab/sp/mesp/kobert")
     tf.flags.DEFINE_integer("vocab_size", args.vocab_size, "Number of vocabulary")
     tf.flags.DEFINE_integer("max_len", args.max_len, "maximum sequence length")
 
@@ -51,7 +51,6 @@ def main(args):
     print("")
 
     # Tokenizer Preparation
-    #max_len = args.max_len
     vocab_size = args.vocab_size  # default 30000
     data_loader = MultiClassDataLoader(tf.flags)
 
@@ -124,11 +123,6 @@ def main(args):
                 os.makedirs(checkpoint_dir)
             saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
 
-            # Write vocabulary
-            """
-                add code 
-            """
-
             # Initialize all variables
             sess.run(tf.compat.v1.global_variables_initializer())
 
@@ -167,7 +161,7 @@ def main(args):
                 print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
                 if writer:
                     writer.add_summary(summaries, step)
-                return loss
+                return accuracy, loss
 
             # Generate batches
             batches = data_helpers.batch_iter(
@@ -194,8 +188,7 @@ def main(args):
                         path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                         print("Saved model checkpoint to {}\n".format(path))
                         print("\nTest Evaluation:")
-                        test_loss = dev_step(x_test, y_test, writer=dev_summary_writer)
-                        print('test loss:', test_loss)
+                        test_accuracy, test_loss = dev_step(x_test, y_test, writer=dev_summary_writer)
                     elif curr_loss > val_loss_min:
                         early_stopping_counter += 1
                         print('early stopping counter:', str(early_stopping_counter))
@@ -203,6 +196,8 @@ def main(args):
                             total_train = (train_end - train_start).total_seconds()
                             print('early stopping')
                             print('total train time:', str(total_train),'s')
+                            print('test accuracy:', test_accuracy)
+                            print('test loss:', test_loss)
                             break
                     print("")
                 
@@ -212,7 +207,7 @@ if __name__ == '__main__':
     parser.add_argument('--dev_corpus_path', type=str, required=True, help="dev txt file path")
     parser.add_argument('--test_corpus_path', type=str, required=True, help="test txt file path")
     parser.add_argument('--class_data_path', type=str, required=True, help="Data source for the class list")
-    parser.add_argument('--tokenizer_type', type=str, required=True, help="mecab/sp/mesp/kobert")
+    parser.add_argument('--tokenizer_name', type=str, required=True, help="mecab/sp/mesp/kobert")
 
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=7,

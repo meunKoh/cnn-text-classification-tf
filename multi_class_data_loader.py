@@ -1,6 +1,5 @@
 import numpy as np
-from vocab_processor import VocabProcessor
-
+import text_preprocessing
 
 class MultiClassDataLoader(object):
     """
@@ -17,18 +16,18 @@ class MultiClassDataLoader(object):
         self.__test_data_file = None
         self.__class_data_file = None
         self.__classes_cache = None
-        self.__tokenizer_type = None
+        self.__tokenizer_name = None
         self.__vocab_size = None
         self.__max_len = None
+        self.text_processor = None
 
     def prepare_data(self):
         self.__resolve_params()
         x_train, y_train = self.__load_data_and_labels(self.__train_data_file)
         x_dev, y_dev = self.__load_data_and_labels(self.__dev_data_file)
         x_test, y_test = self.__load_data_and_labels(self.__test_data_file)
-
-        vocab_processor = VocabProcessor(self.__tokenizer_type, self.__vocab_size, self.__max_len)
-        return vocab_processor.process_texts(x_train, y_train, x_dev, y_dev, x_test, y_test)
+        x_train, x_dev, x_test = self.text_processor.process_datasets(x_train, x_dev, x_test)
+        return [x_train, y_train, x_dev, y_dev, x_test, y_test]
 
     def class_labels(self, class_indexes):
         return [self.__classes()[idx] for idx in class_indexes]
@@ -88,7 +87,22 @@ class MultiClassDataLoader(object):
             self.__dev_data_file = self.__flags.FLAGS.dev_corpus_path
             self.__test_data_file = self.__flags.FLAGS.test_corpus_path
             self.__class_data_file = self.__flags.FLAGS.class_data_path
-        if self.__tokenizer_type is None:
-            self.__tokenizer_type = self.__flags.FLAGS.tokenizer_type
+        if self.__tokenizer_name is None:
+            self.__tokenizer_name = self.__flags.FLAGS.tokenizer_name
             self.__max_len = self.__flags.FLAGS.max_len
             self.__vocab_size = self.__flags.FLAGS.vocab_size
+
+            tokenizer_name_map = {
+                'mecab' : text_preprocessing.TokenizerProcessor(
+                                                            max_len=self.__max_len,
+                                                            vocab_size=self.__vocab_size)
+                ,'sp' : text_preprocessing.SentencepieceProcessor(
+                                                            max_len=self.__max_len,
+                                                            tokenizer_name='sp30k',
+                                                            vocab_size=30000)
+                ,'mesp' : text_preprocessing.SentencepieceProcessor(
+                                                            max_len=self.__max_len,
+                                                            tokenizer_name='mesp30k',
+                                                            vocab_size=30000)
+            }
+            self.text_processor = tokenizer_name_map[self.__tokenizer_name]

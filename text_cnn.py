@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 
 
 class TextCNN(object):
@@ -61,7 +60,6 @@ class TextCNN(object):
 
         # Add dropout
         with tf.name_scope("dropout"):
-            #rate = 1 - self.dropout_keep_prob
             self.h_drop = tf.nn.dropout(self.h_pool_flat, self.dropout_keep_prob)
 
         # Final (unnormalized) scores and predictions
@@ -77,7 +75,7 @@ class TextCNN(object):
             self.softmax = tf.nn.softmax(self.scores, name="softmax")
             self.predictions = tf.argmax(self.softmax, 1, name="predictions")
 
-        # CalculateMean cross-entropy loss
+        # Calculate Mean cross-entropy loss
         with tf.name_scope("loss"):
             losses = tf.nn.softmax_cross_entropy_with_logits(logits=self.scores, labels=self.input_y)
             self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss
