@@ -26,7 +26,7 @@ class MultiClassDataLoader(object):
         x_train, y_train = self.__load_data_and_labels(self.__train_data_file)
         x_dev, y_dev = self.__load_data_and_labels(self.__dev_data_file)
         x_test, y_test = self.__load_data_and_labels(self.__test_data_file)
-        x_train, x_dev, x_test = self.text_processor.process_datasets(x_train, x_dev, x_test)
+        x_train, x_dev, x_test = self.text_processor.process_datasets([x_train, x_dev, x_test])
         return [x_train, y_train, x_dev, y_dev, x_test, y_test]
 
     def class_labels(self, class_indexes):
