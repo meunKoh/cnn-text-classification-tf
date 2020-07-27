@@ -180,7 +180,7 @@ def main(args):
                 current_step = tf.compat.v1.train.global_step(sess, global_step)
                 if current_step % FLAGS.evaluate_every == 0:
                     print("\nEvaluation:")
-                    curr_loss = dev_step(x_dev, y_dev, writer=dev_summary_writer)
+                    dev_accuracy, curr_loss = dev_step(x_dev, y_dev, writer=dev_summary_writer)
                     if curr_loss <= val_loss_min:
                         val_loss_min = curr_loss
                         early_stopping_counter = 0
