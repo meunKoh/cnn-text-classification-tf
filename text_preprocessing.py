@@ -13,7 +13,6 @@ class TokenizerProcessor(object):
         self.vocab_size = vocab_size
         self.tokenizer = tokenizer
         if train_data is not None:
-            print('tokenizer selected')
             self.fit_tokenizer(train_data=train_data)
 
     def fit_tokenizer(self, train_data):

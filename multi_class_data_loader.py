@@ -93,19 +93,19 @@ class MultiClassDataLoader(object):
             self.__vocab_size = self.__flags.FLAGS.vocab_size
 
             tokenizer_name_map = {
-                'mecab': text_preprocessing.TokenizerProcessor(
+                'mecab' : text_preprocessing.TokenizerProcessor(
                                                             max_len=self.__max_len,
                                                             vocab_size=self.__vocab_size,
                                                             train_data=self.__train_data_file)
-                ,'sp': text_preprocessing.SentencepieceProcessor(
+                ,'sp' : text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,
                                                             tokenizer_name='sp30k',
                                                             vocab_size=30000)
-                ,'mesp': text_preprocessing.SentencepieceProcessor(
+                ,'mesp' : text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,
                                                             tokenizer_name='mesp30k',
                                                             vocab_size=30000)
-                ,'kobert': text_preprocessing.KobertProcessor(
+                ,'kobert' :  text_preprocessing.KobertProcessor(
                                                             max_len=self.__max_len,
                                                             vocab_size=8002)
             }
