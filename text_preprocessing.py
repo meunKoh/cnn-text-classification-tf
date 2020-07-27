@@ -8,10 +8,12 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 class TokenizerProcessor(object):
 
-    def __init__(self, max_len, vocab_size=30000, tokenizer=None):
+    def __init__(self, max_len, vocab_size=30000, tokenizer=None, train_data=None):
         self.max_len = max_len
         self.vocab_size = vocab_size
         self.tokenizer = tokenizer
+        if train_data is not None:
+            self.fit_tokenizer(train_data=train_data)
 
     def fit_tokenizer(self, train_data):
         """data_train : train-data to fit tokenizer"""
@@ -86,7 +88,7 @@ class KobertProcessor(object):
         from kobert.pytorch_kobert import get_pytorch_kobert_model
 
         # Build vocabulary
-        bertmodel, vocab = get_pytorch_kobert_model()
+        _, vocab = get_pytorch_kobert_model()
         tokenizer = get_tokenizer()
         kobert_tokenizer = nlp.data.BERTSPTokenizer(tokenizer, vocab, lower=False)
         transform = nlp.data.BERTSentenceTransform(

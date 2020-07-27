@@ -95,7 +95,8 @@ class MultiClassDataLoader(object):
             tokenizer_name_map = {
                 'mecab' : text_preprocessing.TokenizerProcessor(
                                                             max_len=self.__max_len,
-                                                            vocab_size=self.__vocab_size)
+                                                            vocab_size=self.__vocab_size,
+                                                            train_data=self.__train_data_file)
                 ,'sp' : text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,
                                                             tokenizer_name='sp30k',
