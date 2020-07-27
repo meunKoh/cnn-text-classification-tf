@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 
 
-class TextCNN_Classifier(object):
+class TextcnnClassifier(object):
 
     def __init__(self, checkpoint_dir, checkpoint_path, TextProcessor):
         """

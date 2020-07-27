@@ -4,12 +4,14 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 """
 클래스 분리 : TokenizerProcessor, SentencepieceProcessor, KobertProcessor
 """
+
+
 class TokenizerProcessor(object):
 
-    def __init__(self, max_len, vocab_size=30000):
+    def __init__(self, max_len, vocab_size=30000, tokenizer=None):
         self.max_len = max_len
         self.vocab_size = vocab_size
-        self.tokenizer = None
+        self.tokenizer = tokenizer
 
     def fit_tokenizer(self, train_data):
         """data_train : train-data to fit tokenizer"""
@@ -69,9 +71,10 @@ class SentencepieceProcessor(object):
     def transform(self, data):
         """data : list of string"""
         return np.array(pad_sequences([self.__tokenizer.encode_as_ids(x) for x in data]
-                                      , maxlen=self.__max_len
+                                      , maxlen=self.max_len
                                       , padding='post'
                                       , value=1))
+
 
 class TextProcessor(object):
 
@@ -85,8 +88,8 @@ class TextProcessor(object):
 
         self.__tokenizer_type = tokenizer_type
         self.__tokenizer = None
-        self.__process_with_tokenizer = tokenizer_map[self.__tokenizer_type] # data 1개
-        #self.__process_with_tokenizer = tokenizer_map[self.__tokenizer_type]
+        self.__process_with_tokenizer = tokenizer_map[self.__tokenizer_type]  # data 1개
+        # self.__process_with_tokenizer = tokenizer_map[self.__tokenizer_type]
         self.__vocab_size = vocab_size
         self.__max_len = max_len
 
