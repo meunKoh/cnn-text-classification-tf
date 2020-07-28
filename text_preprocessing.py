@@ -8,10 +8,14 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 class TokenizerProcessor(object):
 
-    def __init__(self, max_len, vocab_size=30000, tokenizer=None):
+    def __init__(self, max_len, vocab_size=30000, train_tokenizer=False, tokenizer=None, train_data=None):
         self.max_len = max_len
         self.vocab_size = vocab_size
         self.tokenizer = tokenizer
+
+        if train_tokenizer is True:
+            self.fit_tokenizer(train_data=train_data)
+            print('fitted tokenizer words count:', len(self.tokenizer.word_counts))
 
     def fit_tokenizer(self, train_data):
         """data_train : train-data to fit tokenizer"""

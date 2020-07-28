@@ -17,6 +17,7 @@ class MultiClassDataLoader(object):
         self.__class_data_file = None
         self.__classes_cache = None
         self.__tokenizer_name = None
+        self.__train_tokenizer = None
         self.__vocab_size = None
         self.__max_len = None
         self.text_processor = None
@@ -89,13 +90,16 @@ class MultiClassDataLoader(object):
             self.__class_data_file = self.__flags.FLAGS.class_data_path
         if self.__tokenizer_name is None:
             self.__tokenizer_name = self.__flags.FLAGS.tokenizer_name
+            self.__train_tokenizer = self.__flags.FLAGS.tokenizer_name
             self.__max_len = self.__flags.FLAGS.max_len
             self.__vocab_size = self.__flags.FLAGS.vocab_size
 
             tokenizer_name_map = {
                 'mecab' : text_preprocessing.TokenizerProcessor(
                                                             max_len=self.__max_len,
-                                                            vocab_size=self.__vocab_size)
+                                                            vocab_size=self.__vocab_size,
+                                                            train_tokenizer=self.__train_tokenizer,
+                                                            train_data=self.__train_data_file)
                 ,'sp' : text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,
                                                             tokenizer_name='sp30k',
