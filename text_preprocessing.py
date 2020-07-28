@@ -75,10 +75,9 @@ class SentencepieceProcessor(object):
 
 class KobertProcessor(object):
 
-    def __init__(self, max_len, tokenizer_name=None, vocab_size=8002):
+    def __init__(self, max_len, vocab_size=8002):
         self.max_len = max_len
         self.vocab_size = vocab_size
-        self.__tokenizer_name = tokenizer_name
         self.tokenizer = self.load_tokenizer()
 
     def load_tokenizer(self):

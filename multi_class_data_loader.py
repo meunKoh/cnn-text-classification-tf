@@ -104,5 +104,6 @@ class MultiClassDataLoader(object):
                                                             max_len=self.__max_len,
                                                             tokenizer_name='mesp30k',
                                                             vocab_size=30000)
+                ,'kobert' : text_preprocessing.KobertProcessor(max_len=self.__max_len)
             }
             self.text_processor = tokenizer_name_map[self.__tokenizer_name]
