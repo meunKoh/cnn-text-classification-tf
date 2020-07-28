@@ -95,20 +95,21 @@ class MultiClassDataLoader(object):
             self.__vocab_size = self.__flags.FLAGS.vocab_size
             print(self.__tokenizer_name)
 
-            tokenizer_name_map = {
-                'mecab': text_preprocessing.TokenizerProcessor(
+            if self.__tokenizer_name == 'mecab':
+                self.text_processor = text_preprocessing.TokenizerProcessor(
                                                             max_len=self.__max_len,
                                                             vocab_size=self.__vocab_size,
                                                             train_tokenizer=self.__train_tokenizer,
                                                             train_data=self.__train_data_file)
-                , 'sp': text_preprocessing.SentencepieceProcessor(
+            elif self.__tokenizer_name == 'sp':
+                self.text_processor = text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,
                                                             tokenizer_name='sp30k',
                                                             vocab_size=30000)
-                , 'mesp': text_preprocessing.SentencepieceProcessor(
+            elif self.__tokenizer_name == 'mesp':
+                self.text_processor = text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,
                                                             tokenizer_name='mesp30k',
                                                             vocab_size=30000)
-                , 'kobert': text_preprocessing.KobertProcessor(max_len=self.__max_len)
-            }
-            self.text_processor = tokenizer_name_map[self.__tokenizer_name]
+            elif self.__tokenizer_name == 'kobert':
+                self.text_processor = text_preprocessing.KobertProcessor(max_len=self.__max_len)
