@@ -90,7 +90,7 @@ class MultiClassDataLoader(object):
             self.__class_data_file = self.__flags.FLAGS.class_data_path
         if self.__tokenizer_name is None:
             self.__tokenizer_name = self.__flags.FLAGS.tokenizer_name
-            self.__train_tokenizer = self.__flags.FLAGS.tokenizer_name
+            self.__train_tokenizer = self.__flags.FLAGS.train_tokenizer
             self.__max_len = self.__flags.FLAGS.max_len
             self.__vocab_size = self.__flags.FLAGS.vocab_size
 
@@ -110,4 +110,5 @@ class MultiClassDataLoader(object):
                                                             vocab_size=30000)
                 ,'kobert' : text_preprocessing.KobertProcessor(max_len=self.__max_len)
             }
+            print(self.__tokenizer_name)
             self.text_processor = tokenizer_name_map[self.__tokenizer_name]
