@@ -2,7 +2,7 @@ import numpy as np
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 """
-클래스 분리 : TokenizerProcessor, SentencepieceProcessor, KobertProcessor
+클래스 분리 : TokenizerProcessor, MecabProcessor, SentencepieceProcessor, KobertProcessor
 """
 
 
@@ -13,7 +13,6 @@ class TokenizerProcessor(object):
         self.max_len = max_len
         self.vocab_size = vocab_size
         self.tokenizer = tokenizer
-        self.__apply_mecab = apply_mecab
 
         if train_tokenizer is True:
             self.fit_tokenizer(train_data=train_data)
@@ -33,31 +32,15 @@ class TokenizerProcessor(object):
                 row = row.replace('\n', '')
                 idx = row.rfind(',')
                 data = row[:idx]
-                data = self.__load_data(data)
                 x_train.append(data)
         return x_train
-
-    def __load_data(self, data):
-        """data : list of string"""
-        if self.__apply_mecab is True:
-            from konlpy.tag import Mecab
-            mecab = Mecab()
-            data = mecab.morphs(data)
-            data = ' '.join(data)
-            return data
-        else:
-            return data
 
     def process_datasets(self, datasets):
         return [self.transform(dataset) for dataset in datasets]
 
     def transform(self, data):
         """data : list of string"""
-        data_list = []
-        for text in data:
-            text = self.__load_data(text)
-            data_list.append(text)
-        return np.array(pad_sequences(self.tokenizer.texts_to_sequences(data_list)
+        return np.array(pad_sequences(self.tokenizer.texts_to_sequences(data)
                                       , maxlen=self.max_len
                                       , padding='post'))
 
@@ -93,32 +76,4 @@ class SentencepieceProcessor(object):
                                       , maxlen=self.max_len
                                       , padding='post'
                                       , value=1))
-
-
-class KobertProcessor(object):
-
-    def __init__(self, max_len, vocab_size=8002):
-        self.max_len = max_len
-        self.vocab_size = vocab_size
-        self.tokenizer = self.load_tokenizer()
-
-    def load_tokenizer(self):
-        import gluonnlp as nlp
-        from kobert.utils import get_tokenizer
-        from kobert.pytorch_kobert import get_pytorch_kobert_model
-
-        # Build vocabulary
-        bertmodel, vocab = get_pytorch_kobert_model()
-        tokenizer = get_tokenizer()
-        kobert_tokenizer = nlp.data.BERTSPTokenizer(tokenizer, vocab, lower=False)
-        transform = nlp.data.BERTSentenceTransform(
-            kobert_tokenizer, max_seq_length=self.max_len, pad=True, pair=False)
-        return transform
-
-    def process_datasets(self, datasets):
-        return [self.transform(dataset) for dataset in datasets]
-
-    def transform(self, data):
-        data = [self.tokenizer([sentence])[0] for sentence in data]
-        return np.array([array for array in data])
 

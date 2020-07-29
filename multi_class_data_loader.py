@@ -98,13 +98,19 @@ class MultiClassDataLoader(object):
             print(self.__tokenizer_name)
             print('apply mecab:', self.__apply_mecab)
 
-            if self.__tokenizer_name == 'mecab':
+            if self.__tokenizer_name == 'mecab' and self.__apply_mecab is True:
                 self.text_processor = text_preprocessing.TokenizerProcessor(
                                                             max_len=self.__max_len,
                                                             vocab_size=self.__vocab_size,
                                                             train_tokenizer=self.__train_tokenizer,
-                                                            train_data=self.__train_data_file,
-                                                            apply_mecab=self.__apply_mecab)
+                                                            train_data=self.__train_data_file)
+            elif self.__tokenizer_name == 'mecab':
+                from text_preprocessing.mecab import MecabTokenizerProcessor
+                self.text_processor = MecabTokenizerProcessor(
+                                                            max_len=self.__max_len,
+                                                            vocab_size=self.__vocab_size,
+                                                            train_tokenizer=self.__train_tokenizer,
+                                                            train_data=self.__train_data_file)
             elif self.__tokenizer_name == 'sp':
                 self.text_processor = text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,
@@ -116,4 +122,5 @@ class MultiClassDataLoader(object):
                                                             tokenizer_name='mesp30k',
                                                             vocab_size=30000)
             elif self.__tokenizer_name == 'kobert':
-                self.text_processor = text_preprocessing.KobertProcessor(max_len=self.__max_len)
+                from text_preprocessing.kobert import KobertProcessor
+                self.text_processor = KobertProcessor(max_len=self.__max_len)
