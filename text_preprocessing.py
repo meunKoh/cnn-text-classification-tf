@@ -43,11 +43,16 @@ class TokenizerProcessor(object):
         return x_train
 
     def __load_data(self, data):
+        """data : list of string"""
         if self.__apply_mecab is True:
             from konlpy.tag import Mecab
             mecab = Mecab()
-            data = mecab.morphs(data)
-            return ' '.join(data)
+            data_mecab = []
+            for text in data:
+                text = mecab.morphs(text)
+                text = ' '.join(text)
+                data_mecab.append(text)
+            return data_mecab
         else:
             return data
 
