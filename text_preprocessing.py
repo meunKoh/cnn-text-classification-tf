@@ -8,12 +8,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 class TokenizerProcessor(object):
 
-    def __init__(self,
-                 max_len,
-                 vocab_size=30000,
-                 train_tokenizer=False,
-                 tokenizer=None,
-                 train_data=None,
+    def __init__(self, max_len, vocab_size=30000, train_tokenizer=False, tokenizer=None, train_data=None,
                  apply_mecab=False):
         self.max_len = max_len
         self.vocab_size = vocab_size
@@ -47,12 +42,9 @@ class TokenizerProcessor(object):
         if self.__apply_mecab is True:
             from konlpy.tag import Mecab
             mecab = Mecab()
-            data_mecab = []
-            for text in data:
-                text = mecab.morphs(text)
-                text = ' '.join(text)
-                data_mecab.append(text)
-            return data_mecab
+            data = mecab.morphs(data)
+            data = ' '.join(data)
+            return data
         else:
             return data
 
@@ -61,7 +53,11 @@ class TokenizerProcessor(object):
 
     def transform(self, data):
         """data : list of string"""
-        return np.array(pad_sequences(self.tokenizer.texts_to_sequences(self.__load_data(data))
+        data_list = []
+        for text in data:
+            text = self.__load_data(text)
+            data_list.append(text)
+        return np.array(pad_sequences(self.tokenizer.texts_to_sequences(data_list)
                                       , maxlen=self.max_len
                                       , padding='post'))
 
