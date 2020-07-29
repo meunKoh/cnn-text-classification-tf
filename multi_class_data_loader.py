@@ -20,6 +20,7 @@ class MultiClassDataLoader(object):
         self.__train_tokenizer = None
         self.__vocab_size = None
         self.__max_len = None
+        self.__apply_mecab = None
         self.text_processor = None
 
     def prepare_data(self):
@@ -91,16 +92,19 @@ class MultiClassDataLoader(object):
         if self.__tokenizer_name is None:
             self.__tokenizer_name = self.__flags.FLAGS.tokenizer_name
             self.__train_tokenizer = self.__flags.FLAGS.train_tokenizer
+            self.__apply_mecab = self.__flags.FLAGS.apply_mecab
             self.__max_len = self.__flags.FLAGS.max_len
             self.__vocab_size = self.__flags.FLAGS.vocab_size
             print(self.__tokenizer_name)
+            print('apply mecab:', self.__apply_mecab)
 
             if self.__tokenizer_name == 'mecab':
                 self.text_processor = text_preprocessing.TokenizerProcessor(
                                                             max_len=self.__max_len,
                                                             vocab_size=self.__vocab_size,
                                                             train_tokenizer=self.__train_tokenizer,
-                                                            train_data=self.__train_data_file)
+                                                            train_data=self.__train_data_file,
+                                                            apply_mecab=self.__apply_mecab)
             elif self.__tokenizer_name == 'sp':
                 self.text_processor = text_preprocessing.SentencepieceProcessor(
                                                             max_len=self.__max_len,

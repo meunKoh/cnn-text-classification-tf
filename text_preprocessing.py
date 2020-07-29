@@ -8,7 +8,13 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 class TokenizerProcessor(object):
 
-    def __init__(self, max_len, vocab_size=30000, train_tokenizer=False, tokenizer=None, train_data=None, apply_mecab=False):
+    def __init__(self,
+                 max_len,
+                 vocab_size=30000,
+                 train_tokenizer=False,
+                 tokenizer=None,
+                 train_data=None,
+                 apply_mecab=False):
         self.max_len = max_len
         self.vocab_size = vocab_size
         self.tokenizer = tokenizer
@@ -22,11 +28,7 @@ class TokenizerProcessor(object):
         """train_data : train-data to fit tokenizer"""
         from tensorflow.keras.preprocessing.text import Tokenizer
         self.tokenizer = Tokenizer(num_words=self.vocab_size+1, oov_token='[UNK]')
-        if self.__apply_mecab is False:
-            self.tokenizer.fit_on_texts(self.__load_train_data(train_data=train_data))
-        elif self.__apply_mecab is True:
-            print('apply mecab')
-            self.tokenizer.fit_on_texts(self.__load_train_data_with_mecab(train_data=train_data))
+        self.tokenizer.fit_on_texts(self.__load_train_data(train_data=train_data))
 
     def __load_train_data(self, train_data):
         x_train = []
@@ -36,32 +38,25 @@ class TokenizerProcessor(object):
                 row = row.replace('\n', '')
                 idx = row.rfind(',')
                 data = row[:idx]
+                data = self.__load_data(data)
                 x_train.append(data)
         return x_train
 
-    def __load_train_data_with_mecab(self, train_data):
-        from konlpy.tag import Mecab
-        mecab = Mecab()
-
-        x_train = []
-        with open(train_data, 'r', encoding='utf-8') as tsvin:
-            tsvin = tsvin.readlines()
-            for row in tsvin:
-                row = row.replace('\n', '')
-                idx = row.rfind(',')
-                data = row[:idx]
-                data = mecab.morphs(data)
-                data = ' '.join(data)
-                x_train.append(data)
-        return x_train
-
+    def __load_data(self, data):
+        if self.__apply_mecab is True:
+            from konlpy.tag import Mecab
+            mecab = Mecab()
+            data = mecab.morphs(data)
+            return ' '.join(data)
+        else:
+            return data
 
     def process_datasets(self, datasets):
         return [self.transform(dataset) for dataset in datasets]
 
     def transform(self, data):
         """data : list of string"""
-        return np.array(pad_sequences(self.tokenizer.texts_to_sequences(data)
+        return np.array(pad_sequences(self.tokenizer.texts_to_sequences(self.__load_data(data))
                                       , maxlen=self.max_len
                                       , padding='post'))
 
