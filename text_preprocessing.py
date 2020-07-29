@@ -8,20 +8,25 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 class TokenizerProcessor(object):
 
-    def __init__(self, max_len, vocab_size=30000, train_tokenizer=False, tokenizer=None, train_data=None):
+    def __init__(self, max_len, vocab_size=30000, train_tokenizer=False, tokenizer=None, train_data=None, apply_mecab=False):
         self.max_len = max_len
         self.vocab_size = vocab_size
         self.tokenizer = tokenizer
+        self.__apply_mecab = apply_mecab
 
         if train_tokenizer is True:
             self.fit_tokenizer(train_data=train_data)
             print('fitted tokenizer words count:', len(self.tokenizer.word_counts))
 
     def fit_tokenizer(self, train_data):
-        """data_train : train-data to fit tokenizer"""
+        """train_data : train-data to fit tokenizer"""
         from tensorflow.keras.preprocessing.text import Tokenizer
         self.tokenizer = Tokenizer(num_words=self.vocab_size+1, oov_token='[UNK]')
-        self.tokenizer.fit_on_texts(self.__load_train_data(train_data=train_data))
+        if self.__apply_mecab is False:
+            self.tokenizer.fit_on_texts(self.__load_train_data(train_data=train_data))
+        elif self.__apply_mecab is True:
+            print('apply mecab')
+            self.tokenizer.fit_on_texts(self.__load_train_data_with_mecab(train_data=train_data))
 
     def __load_train_data(self, train_data):
         x_train = []
@@ -33,6 +38,23 @@ class TokenizerProcessor(object):
                 data = row[:idx]
                 x_train.append(data)
         return x_train
+
+    def __load_train_data_with_mecab(self, train_data):
+        from konlpy.tag import Mecab
+        mecab = Mecab()
+
+        x_train = []
+        with open(train_data, 'r', encoding='utf-8') as tsvin:
+            tsvin = tsvin.readlines()
+            for row in tsvin:
+                row = row.replace('\n', '')
+                idx = row.rfind(',')
+                data = row[:idx]
+                data = mecab.morphs(data)
+                data = ' '.join(data)
+                x_train.append(data)
+        return x_train
+
 
     def process_datasets(self, datasets):
         return [self.transform(dataset) for dataset in datasets]
