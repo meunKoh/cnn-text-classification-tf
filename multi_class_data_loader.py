@@ -99,14 +99,14 @@ class MultiClassDataLoader(object):
             print('apply mecab:', self.__apply_mecab)
 
             if self.__tokenizer_name == 'mecab' and self.__apply_mecab is True:
-                self.text_processor = text_preprocessing.TokenizerProcessor(
+                from text_preprocessing.mecab import MecabTokenizerProcessor
+                self.text_processor = MecabTokenizerProcessor(
                                                             max_len=self.__max_len,
                                                             vocab_size=self.__vocab_size,
                                                             train_tokenizer=self.__train_tokenizer,
                                                             train_data=self.__train_data_file)
             elif self.__tokenizer_name == 'mecab':
-                from text_preprocessing.mecab import MecabTokenizerProcessor
-                self.text_processor = MecabTokenizerProcessor(
+                self.text_processor = text_preprocessing.TokenizerProcessor(
                                                             max_len=self.__max_len,
                                                             vocab_size=self.__vocab_size,
                                                             train_tokenizer=self.__train_tokenizer,
