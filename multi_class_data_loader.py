@@ -95,10 +95,10 @@ class MultiClassDataLoader(object):
             self.__apply_mecab = self.__flags.FLAGS.apply_mecab
             self.__max_len = self.__flags.FLAGS.max_len
             self.__vocab_size = self.__flags.FLAGS.vocab_size
-            print(self.__tokenizer_name)
-            print('apply mecab:', self.__apply_mecab)
+            print('tokenizer:', self.__tokenizer_name)
 
             if self.__tokenizer_name == 'mecab' and self.__apply_mecab is True:
+                print('apply mecab:', self.__apply_mecab)
                 from text_preprocessing.mecab import MecabTokenizerProcessor
                 self.text_processor = MecabTokenizerProcessor(
                                                             max_len=self.__max_len,

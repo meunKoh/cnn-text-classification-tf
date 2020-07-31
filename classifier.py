@@ -15,13 +15,13 @@ class TextcnnClassifier(object):
     def predict_proba(self, texts):
         graph = tf.Graph()
         with graph.as_default():
-            session_conf = tf.ConfigProto(
+            session_conf = tf.compat.v1.ConfigProto(
                 allow_soft_placement=True,
                 log_device_placement=False)
-            sess = tf.Session(config=session_conf)
+            sess = tf.compat.v1.Session(config=session_conf)
 
             with sess.as_default():
-                saver = tf.train.import_meta_graph('{}.meta'.format(self.__checkpoint_path))
+                saver = tf.compat.v1.train.import_meta_graph('{}.meta'.format(self.__checkpoint_path))
                 saver.restore(sess, tf.train.latest_checkpoint(self.__checkpoint_dir))
 
                 # Get the placeholders from the graph by name
