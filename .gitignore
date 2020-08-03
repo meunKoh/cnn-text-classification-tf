@@ -1,6 +1,7 @@
 *.npy
 runs/
 models/*/summaries/
+data/ignore/
 textcnn_lime_analysis.ipynb
 
 # Created by https://www.gitignore.io/api/python,ipythonnotebook

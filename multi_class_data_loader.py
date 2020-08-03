@@ -121,6 +121,11 @@ class MultiClassDataLoader(object):
                                                             max_len=self.__max_len,
                                                             tokenizer_name='mesp30k',
                                                             vocab_size=30000)
+            elif self.__tokenizer_name == 'mesp-userdic':
+                self.text_processor = text_preprocessing.SentencepieceProcessor(
+                                                            max_len=self.__max_len,
+                                                            tokenizer_name='mesp-userdic30k',
+                                                            vocab_size=30000)
             elif self.__tokenizer_name == 'kobert':
                 from text_preprocessing.kobert import KobertProcessor
                 self.text_processor = KobertProcessor(max_len=self.__max_len)

@@ -60,7 +60,8 @@ class SentencepieceProcessor(object):
             import sentencepiece as spm
             tokenizer_path = {
                 'mesp30k': './tokenizers/mecab+sp-up-good3-30k.model',
-                'sp30k': './tokenizers/sp-up-good3-30k.model'
+                'sp30k': './tokenizers/sp-up-good3-30k.model',
+                'mesp-userdic30k': './tokenizers/mecab+userdic+sp-up-good3-30k.model'
             }
             sp_model_path = tokenizer_path[self.__tokenizer_name]
             sp_tokenizer = spm.SentencePieceProcessor()
