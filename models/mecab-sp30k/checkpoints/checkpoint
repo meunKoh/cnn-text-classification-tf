@@ -1,6 +1,2 @@
-model_checkpoint_path: "/content/cnn-text-classification-tf/runs/1595914129/checkpoints/model-3500"
-all_model_checkpoint_paths: "/content/cnn-text-classification-tf/runs/1595914129/checkpoints/model-2800"
-all_model_checkpoint_paths: "/content/cnn-text-classification-tf/runs/1595914129/checkpoints/model-2900"
-all_model_checkpoint_paths: "/content/cnn-text-classification-tf/runs/1595914129/checkpoints/model-3000"
-all_model_checkpoint_paths: "/content/cnn-text-classification-tf/runs/1595914129/checkpoints/model-3400"
-all_model_checkpoint_paths: "/content/cnn-text-classification-tf/runs/1595914129/checkpoints/model-3500"
+model_checkpoint_path: "/content/cnn-text-classification-tf/models/mecab-sp30k/checkpoints/best"
+all_model_checkpoint_paths: "/content/cnn-text-classification-tf/models/mecab-sp30k/checkpoints/best"
