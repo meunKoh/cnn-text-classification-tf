@@ -1,0 +1,2 @@
+model_checkpoint_path: "/content/cnn-text-classification-tf/models/clean-sp30k/checkpoints/best"
+all_model_checkpoint_paths: "/content/cnn-text-classification-tf/models/clean-sp30k/checkpoints/best"
